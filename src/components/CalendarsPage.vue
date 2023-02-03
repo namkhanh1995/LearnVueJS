@@ -65,6 +65,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data: () => ({
     type: 'month',
@@ -82,40 +84,101 @@ export default {
     events: [],
     colors: ['blue', 'indigo', 'deep-purple', 'cyan', 'green', 'orange', 'grey darken-1'],
     names: ['Meeting', 'Holiday', 'PTO', 'Travel', 'Event', 'Birthday', 'Conference', 'Party'],
+    listSchedule: [{
+      id : 0,
+      eventName : '',
+      firstTimestamp : '',
+      secondTimestamp : ''
+    }]
   }),
+  created() {
+    // this.getSchedule()
+  },
   methods: {
-    getEvents ({ start, end }) {
-      const events = []
-
-      const min = new Date(`${start.date}T00:00:00`)
-      const max = new Date(`${end.date}T23:59:59`)
-      const days = (max.getTime() - min.getTime()) / 86400000
-      const eventCount = this.rnd(days, days + 20)
-
-      for (let i = 0; i < eventCount; i++) {
-        const allDay = this.rnd(0, 3) === 0
-        const firstTimestamp = this.rnd(min.getTime(), max.getTime())
-        const first = new Date(firstTimestamp - (firstTimestamp % 900000))
-        const secondTimestamp = this.rnd(2, allDay ? 288 : 8) * 900000
-        const second = new Date(first.getTime() + secondTimestamp)
-
-        events.push({
-          name: this.names[this.rnd(0, this.names.length - 1)],
-          start: first,
-          end: second,
-          color: this.colors[this.rnd(0, this.colors.length - 1)],
-          timed: !allDay,
-        })
-      }
-
-      this.events = events
+    async getSchedule(){
+      await axios.get(`http://localhost:8080/api/schedule`)
+          .then(response => {
+            // let events = []
+            // for(let i = 0; i< response.data.length; i++){
+            //
+            //   events.push({
+            //     name: this.listSchedule[i].eventName,
+            //     start: new Date(this.listSchedule[i].firstTimestamp),
+            //     end: new Date(this.listSchedule[i].secondTimestamp),
+            //     color: 'blue',
+            //     // để hiện thị giờ
+            //     timed: true,
+            //   })
+            // }
+            // this.events = events
+            this.listSchedule = response.data
+            let events = []
+            for(let i = 0; i< response.data.length; i++){
+              events.push({
+                name: this.listSchedule[i].eventName,
+                start: new Date(this.listSchedule[i].firstTimestamp),
+                end: new Date(this.listSchedule[i].secondTimestamp),
+                color: 'blue',
+                // để hiện thị giờ
+                timed: true,
+              });
+            }
+            this.events = events
+            // this.getEvents(this.listSchedule)
+          }).catch(e => {
+        this.errors.push(e)
+      })
     },
+    getEvents () {
+      this.getSchedule()
+      // const events = []
+      // let test = JSON.parse(JSON.stringify(this.listSchedule))
+      // console.log(test)
+      // console.log(this.listSchedule)
+      // get ngày đầu tháng
+      // const min = new Date(`${start.date}T00:00:00`)
+      // console.log(min)
+      // // get ngày cuối tháng
+      // const max = new Date(`${end.date}T23:59:59`)
+
+      // số ngày trong tháng
+      // const days = (max.getTime() - min.getTime()) / 86400000
+
+      // random mock data
+
+
+      // milisecond
+      // const firstTimestamp = this.rnd(min.getTime(), max.getTime())
+      // date first
+      // console.log(firstTimestamp);
+      // const first = new Date(1676679961222)
+      // milisecond
+      // const secondTimestamp = this.rnd(2, 3) * 900000
+      // console.log(secondTimestamp);
+      // date second
+      // const second = new Date(1800000)
+
+    },
+
+    // getEvents(){
+    //   const events = []
+    //   const min = new Date(`${start.date}T00:00:00`)
+    //   console.log()
+    //   events.push({
+    //               name: 'Meeting',
+    //               // start: first,
+    //               // end: second,
+    //               color: 'blue',
+    //               // timed: !allDay,
+    //             })
+    //   this.events = events
+    // },
     getEventColor (event) {
       return event.color
     },
-    rnd (a, b) {
-      return Math.floor((b - a + 1) * Math.random()) + a
-    },
+    // rnd (a, b) {
+    //   return Math.floor((b - a + 1) * Math.random()) + a
+    // },
   },
 
   name: "CalendarsPage"

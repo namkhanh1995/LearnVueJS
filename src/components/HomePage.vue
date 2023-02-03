@@ -1,11 +1,11 @@
 <template>
 
   <div id="app">
-    <v-toolbar  color="blue">
-      <router-link to="/"><v-btn>Home</v-btn></router-link>
-<!--      <router-link to="/listUser"><v-btn >List User</v-btn></router-link>-->
+    <v-toolbar color="blue">
+      <router-link to="/"><v-btn class="btn-home">Schedule</v-btn></router-link>
+      <router-link to="/createCalendars"><v-btn class="btn-home">Create Schedule</v-btn></router-link>
 <!--      <router-link to="/createUser"><v-btn >Create User</v-btn></router-link>-->
-      <router-link to="/listUserCRUD"><v-btn >User</v-btn></router-link>
+      <router-link to="/listUserCRUD"><v-btn class="btn-home">User</v-btn></router-link>
     </v-toolbar>
     <router-view></router-view>
   </div>
@@ -18,5 +18,7 @@ export default {
 </script>
 
 <style scoped>
-
+.btn-home {
+  margin-left: 10px;
+}
 </style>

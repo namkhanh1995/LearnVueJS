@@ -1,29 +1,23 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-// import ListUser from "@/components/ListUser.vue";
-// import CreateUser from "@/components/CreateUser.vue";
 import CalendarsPage from "@/components/CalendarsPage.vue";
 import ListUserCRUD from "@/components/ListUserCRUD.vue";
+import CreateCalendarsPage from "@/components/CreateCalendarsPage.vue";
 
 Vue.use(Router)
 
 export default new Router({
-    routes: [ // bao gồm danh sách route
+    routes: [
         {
-            path: '/', ///path của route
-            name: 'calendars', // tên route
-            component: CalendarsPage // component route sử dụng
+            path: '/',
+            name: 'calendars',
+            component: CalendarsPage
         },
-        // {
-        //     path: '/listUser',
-        //     name: 'listUser',
-        //     component: ListUser
-        // },
-        // {
-        //     path: '/createUser',
-        //     name: 'createUser',
-        //     component: CreateUser
-        // },
+        {
+            path: '/createCalendars',
+            name: 'createCalendars',
+            component: CreateCalendarsPage
+        },
         {
             path: '/listUserCRUD',
             name: 'listUser',

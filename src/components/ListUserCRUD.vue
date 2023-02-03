@@ -9,7 +9,7 @@
       <v-toolbar
           flat
       >
-        <v-toolbar-title>My CRUD</v-toolbar-title>
+        <v-toolbar-title>User Management</v-toolbar-title>
         <v-divider
             class="mx-4"
             inset
@@ -27,6 +27,7 @@
                 class="mb-2"
                 v-bind="attrs"
                 v-on="on"
+                @click="createUser"
             >
               New Item
             </v-btn>
@@ -42,9 +43,11 @@
                   <v-col
                       cols="12"
                       sm="6"
-                      md="4"
+                      md="12"
+                      v-if="show"
                   >
                     <v-text-field
+                        disabled
                         v-model="editedItem.id"
                         label="ID"
                     ></v-text-field>
@@ -52,7 +55,7 @@
                   <v-col
                       cols="12"
                       sm="6"
-                      md="4"
+                      md="12"
                   >
                     <v-text-field
                         v-model="editedItem.firstName"
@@ -62,7 +65,7 @@
                   <v-col
                       cols="12"
                       sm="6"
-                      md="4"
+                      md="12"
                   >
                     <v-text-field
                         v-model="editedItem.lastName"
@@ -72,7 +75,7 @@
                   <v-col
                       cols="12"
                       sm="6"
-                      md="4"
+                      md="12"
                   >
                     <v-text-field
                         v-model="editedItem.emailId"
@@ -167,6 +170,7 @@ export default {
       lastName: '',
       emailId: '',
     },
+    show: false
   }),
 
   computed: {
@@ -198,7 +202,13 @@ export default {
           })
 
     },
+
+    createUser(){
+      this.show = false
+    },
+
     editItem (item) {
+      this.show = true
       this.editedIndex = this.listUser.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialog = true
@@ -242,6 +252,17 @@ export default {
     save () {
       if (this.editedIndex > -1) {
         Object.assign(this.listUser[this.editedIndex], this.editedItem)
+        axios.put('http://localhost:8080/api/users/' + this.editedItem.id,this.editedItem)
+            .then(() => {
+          //Perform Success Action
+          this.getUser();
+        })
+            // eslint-disable-next-line no-unused-vars
+            .catch((error) => {
+              // error.response.status Check status code
+            }).finally(() => {
+          //Perform action in always
+        });
       } else {
         axios.post('http://localhost:8080/api/users', this.editedItem)
 
