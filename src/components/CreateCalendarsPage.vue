@@ -28,6 +28,7 @@
       >
         Save
       </v-btn>
+
     </v-container>
   </v-form>
 </template>
@@ -36,6 +37,8 @@
 import axios from "axios";
 
 export default {
+  props:['modelValue'],
+  emits: ['update:modelValue'],
   data:()=>({
     calendars : {
       id:0,
@@ -45,8 +48,10 @@ export default {
     }
 }),
   mounted() {
-    this.calendars.firstTimestamp = new Date().toISOString().substring(0, 16);
-    this.calendars.secondTimestamp = new Date().toISOString().substring(0, 16);
+    console.log(this.modelValue)
+    this.calendars.firstTimestamp = this.modelValue+"T00:00"
+    this.calendars.secondTimestamp = this.modelValue+"T00:00"
+    // this.calendars.secondTimestamp = new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000).toISOString().substring(0, 16)
   },
   methods:{
     insertCalendars(){

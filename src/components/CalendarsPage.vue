@@ -59,16 +59,118 @@
           :event-overlap-threshold="30"
           :event-color="getEventColor"
           @change="getEvents"
+          @click:event="showEvent"
+          @click:date="showDialog"
       ></v-calendar>
+      <v-menu
+          v-model="selectedOpen"
+          :close-on-content-click="false"
+          :activator="selectedElement"
+          offset-x>
+        <v-card
+            color="grey lighten-4"
+            min-width="350px"
+            flat
+        >
+          <v-toolbar
+              :color="selectedEvent.color"
+              dark
+          >
+            <v-btn icon>
+              <v-icon>mdi-pencil</v-icon>
+            </v-btn>
+            <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-btn icon>
+              <v-icon>mdi-heart</v-icon>
+            </v-btn>
+            <v-btn icon>
+              <v-icon>mdi-dots-vertical</v-icon>
+            </v-btn>
+          </v-toolbar>
+          <v-card-text>
+            <v-icon>mdi-clock-start</v-icon>
+            <span v-html="selectedEvent.start"></span>
+            <v-spacer></v-spacer>
+            <v-icon>mdi-clock-end</v-icon>
+            <span v-html="selectedEvent.end"></span>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn
+                text
+                color="secondary"
+                @click="selectedOpen = false"
+            >
+              Cancel
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-menu>
     </v-sheet>
+
+    <v-dialog
+        v-model="dialog"
+        max-width="500px">
+      <v-card color="grey lighten-4"
+              min-width="350px"
+              flat>
+<!--        <CreateCalendarsPage :modelValue="selectedDate"></CreateCalendarsPage>-->
+        <v-form>
+          <v-container>
+            <v-text-field
+                v-model="calendars.id"
+                type="text"
+                label="User ID"
+            ></v-text-field>
+            <v-text-field
+                v-model="calendars.eventName"
+                type="text"
+                label="Event Name"
+            ></v-text-field>
+            <v-text-field
+                v-model="calendars.firstTimestamp"
+                type="datetime-local"
+                label="Start schedule"
+            ></v-text-field>
+            <v-text-field
+                v-model="calendars.secondTimestamp"
+                type="datetime-local"
+                label="End schedule"
+            ></v-text-field>
+            <v-btn
+                color="success"
+                class="mr-4"
+                @click="insertCalendars"
+            >
+              Save
+            </v-btn>
+
+          </v-container>
+        </v-form>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script>
 import axios from "axios";
+// import CreateCalendarsPage from "@/components/CreateCalendarsPage.vue";
 
 export default {
+  // components: {CreateCalendarsPage},
+
   data: () => ({
+    calendars : {
+      id:0,
+      eventName:'',
+      firstTimestamp:0,
+      secondTimestamp:0
+    },
+    selectedDate : null,
+    selectedOpen: false,
+    selectedEvent: {},
+    selectedElement: null,
+    dialog:false,
     type: 'month',
     types: ['month', 'week', 'day', '4day'],
     mode: 'stack',
@@ -89,7 +191,7 @@ export default {
       eventName : '',
       firstTimestamp : '',
       secondTimestamp : ''
-    }]
+    }],
   }),
   created() {
     // this.getSchedule()
@@ -111,11 +213,15 @@ export default {
             //   })
             // }
             // this.events = events
+            // add giờ vn
+            //let offset = 7
             this.listSchedule = response.data
             let events = []
             for(let i = 0; i< response.data.length; i++){
               events.push({
                 name: this.listSchedule[i].eventName,
+                //start: new Date(this.listSchedule[i].firstTimestamp + (3600000*offset)),
+                //end: new Date(this.listSchedule[i].secondTimestamp + (3600000*offset)),
                 start: new Date(this.listSchedule[i].firstTimestamp),
                 end: new Date(this.listSchedule[i].secondTimestamp),
                 color: 'blue',
@@ -179,8 +285,58 @@ export default {
     // rnd (a, b) {
     //   return Math.floor((b - a + 1) * Math.random()) + a
     // },
-  },
 
+
+    showEvent({ nativeEvent, event }){
+      const open = () => {
+        this.selectedEvent = event
+        this.selectedElement = nativeEvent.target
+        // requestAnimationFrame(() => requestAnimationFrame(() => this.selectedOpen = true))
+        this.selectedOpen = true
+      }
+
+      if (this.selectedOpen) {
+        this.selectedOpen = false
+        open()
+        // requestAnimationFrame(() => requestAnimationFrame(() => open()))
+      } else {
+        open()
+      }
+
+      // nativeEvent.stopPropagation()
+
+    },
+    showDialog(event){
+      this.selectedDate = event.date
+      this.calendars.firstTimestamp = event.date+"T00:00"
+      this.calendars.secondTimestamp = event.date+"T00:00"
+      this.dialog = true
+
+    },
+    insertCalendars(){
+      this.calendars.firstTimestamp = new Date(this.calendars.firstTimestamp).getTime();
+      this.calendars.secondTimestamp = new Date(this.calendars.secondTimestamp).getTime();
+      axios.post('http://localhost:8080/api/schedule', this.calendars)
+
+          .then(() => {
+            //Perform Success Action
+            this.getSchedule()
+            this.dialog = false
+
+          })
+          // eslint-disable-next-line no-unused-vars
+          .catch((error) => {
+            // error.response.status Check status code
+          }).finally(() => {
+        //Perform action in always
+      });
+    },
+    test(){
+      console.log("ok")
+    }
+
+
+  },
   name: "CalendarsPage"
 }
 </script>
